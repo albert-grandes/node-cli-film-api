@@ -1,15 +1,11 @@
-#!/usr/bin/env node
-//import apiCall from "./clearfunctions";
+#!/usr/bin/env node -r dotenv/config 
+import {apiCall} from './functions.js'
+import program from 'commander'
+import https from 'https'
+import dotenv from 'dotenv'
 
-const call = require('./functions');
 
-require('dotenv').config()
-
-
-const { program } = require('commander');
-const https = require('https'); //https://nodejs.org/api/https.html 
 //program.option('-t, --test', 'only is a test')
-
 
 console.log(process.env.API_KEY)
 program
@@ -24,3 +20,4 @@ program
 program.parse(process.argv)
 
 
+//Executing using> $ node -r dotenv/config moviedb.js get-person -p --page 5
