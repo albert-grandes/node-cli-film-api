@@ -1,12 +1,16 @@
 #!/usr/bin/env node
+//import apiCall from "./clearfunctions";
 
-//console.log('weird duck')
+const call = require('./functions');
+
+require('dotenv').config()
+
 
 const { program } = require('commander');
 const https = require('https'); //https://nodejs.org/api/https.html 
 //program.option('-t, --test', 'only is a test')
 
-require('dotenv').config()
+
 console.log(process.env.API_KEY)
 program
   .command('get-person')
@@ -14,13 +18,13 @@ program
   .requiredOption('-p --popular', 'Fetch the popular persons')
   .requiredOption('--page <number>', 'get popular persons')
   .action((options) => {
-    apiCall(options.page)
+    call.apiCall(options.page)
   })
 
 program.parse(process.argv)
 
 //if(program.test) console.log("The program is running")
-function apiCall(page) {
+function apiCall22(page) {
     //https://nodejs.org/api/https.html#https_https_request_options_callback
     const options = {
         host: 'api.themoviedb.org',
