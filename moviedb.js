@@ -1,9 +1,8 @@
-#!/usr/bin/env node -r dotenv/config 
+#!/usr/bin/env node
 import {apiCall} from './functions.js'
 import program from 'commander'
-import https from 'https'
 import dotenv from 'dotenv'
-
+dotenv.config()
 //console.log('weird duck')
 
 //program.option('-t, --test', 'only is a test')
