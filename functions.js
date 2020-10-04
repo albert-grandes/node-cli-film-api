@@ -1,8 +1,10 @@
 import https from 'https'
+import ora from 'ora'
 
 
 export function apiCall(page) {
     //https://nodejs.org/api/https.html#https_https_request_options_callback
+   
     const options = {
         host: 'api.themoviedb.org',
         port: 443,
@@ -10,22 +12,27 @@ export function apiCall(page) {
         method: 'GET'
     };
     //START REQUEST
+    const spinner = ora('Loading popular').start()
     https.request( options, (res) => {
+      
         let response = "";
         res.on('data', (d) => {
             //process.stdout.write(d);
-            response += d
+            response += d 
         });
-        res.on('end', (d) => {
+        res.on('end', (d) => { 
             let json = JSON.parse(response)
-            console.log(json)
-            return json;
+            spinner.succeed("Popular loaded");
+            return json;  
+            
         });
+
     })
     .on('error', (e) => {
-        console.error(e);
-        return e;
+      spinner.fail(`Something went wrong! Error message: ${e.message}`)
     })
     .end();
     //END REQUEST
 }
+
+//export default apiCall
