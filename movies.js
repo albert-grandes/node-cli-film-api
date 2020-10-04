@@ -29,20 +29,27 @@ export function fetchMovies(page, extra) {
     .end();
 }
 
-export function fetchById(id) {
-    //https://nodejs.org/api/https.html#https_https_request_options_callback
-   
+export function fetchMovieById(id, extraTag) {
     const options = {
         host: 'api.themoviedb.org',
         port: 443,
-        path: `/3/person/${id}?api_key=${process.env.API_KEY}`,
+        path: `/3/movie/${id}${extraTag}?api_key=${process.env.API_KEY}`,
         method: 'GET'
     };
-    const spinner = ora('Fetchin person data').start()
+    const spinner = ora('Fetching movie data').start()
     https.request( options, (res) => {
-        res.on('data', (data) => { 
-            printById(JSON.parse(data))
-            spinner.succeed("Person loaded");                   
+        let result = ''
+        res.on('data', (data)=> {
+          result += data
+        })
+        res.on('end', () => { 
+            if(extraTag == '/reviews') {
+              printReview(JSON.parse(result))
+              spinner.succeed("Review loaded") 
+            } else {
+              printMovie(JSON.parse(result))
+              spinner.succeed("Movie loaded") 
+            }                          
         });
     })
     .on('error', (e) => {
@@ -52,33 +59,58 @@ export function fetchById(id) {
 }
 
 function printMovies(movies) {
-    console.log('\n')
-    console.log(chalk.white('------------------'))
-    console.log(chalk.white(`page ${movies.page} of ${movies.total_pages}`))
+    console.log('\n' + chalk.white('------------------ \n') 
+      + chalk.white(`page ${movies.page} of ${movies.total_pages}`))
+  
     for (let movie of movies.results) {
-        console.log('Movie: \n')
-        console.log(chalk.white(`ID: ${movie.id}`))
-        console.log(chalk.white('Title: ') + chalk.blue.bold(movie.title))
-        console.log(chalk.white(`Release date: ${movie.release_date} \n`))
+        console.log('Movie: \n' 
+        + chalk.white(`ID: ${movie.id} \n`)
+        + chalk.white('Title: ') + chalk.blue.bold(`${movie.title} \n`)
+        + chalk.white(`Release date: ${movie.release_date} \n`))
     }
 }
 
-function printById(person) {
-    console.log('\n')
-    console.log(chalk.white('------------------'))
+function printMovie(movie) {
+    console.log('\n' + chalk.white('------------------'))
     
-    console.log(chalk.white('Person:'))
-    console.log(chalk.white(`ID: ${person.id}`))
-    console.log(chalk.white('Name: ') + chalk.blue.bold(person.name))
-    console.log(chalk.white(`Birthday: ${person.birthday}`) + chalk.grey(' | ') + chalk.white(person.place_of_birth))
-    if(person.known_for_department) console.log(chalk.white('Deaprtment: ') + chalk.magenta.bold(person.known_for_department)) 
-    console.log(chalk.white('Biogarphy: ') + chalk.blue.bold(person.biography))
-    console.log(chalk.white('\nAlso known as:'))
-    if(person.also_known_as.length > 0) {
-        for(let name of person.also_known_as) {
-            console.log(chalk.white(name))
-        } 
+    console.log(chalk.white('\nMovie: \n') 
+      + chalk.white(`\nMovie Id: ${movie.id}`)
+      + chalk.white(`\nTitle: `) + chalk.blue.bold(movie.title)
+      + chalk.white(`\nRelease date: ${movie.release_date}`)
+      + chalk.white(`\nRuntime: ${movie.runtime}`)
+      + chalk.white(`\nVote count: ${movie.vote_count}`)
+      + chalk.white(`\nOverview: ${movie.overview}`))
+    console.log('\nGenres:')
+
+    if(movie.genres.length > 0) {
+      for (let genre of movie.genres) {
+        console.log(chalk.white(genre.name))
+      }
     } else {
-        console.log(chalk.yellow.bold(`${person.name} doesn't have other names`))
+      console.log(chalk.yellow(`Movie ${movie.id} doesn't have declared genres`))
     }
+
+    console.log('\nSpoken languages:')
+    if(movie.spoken_languages.length > 0) {
+      for (let lang of movie.spoken_languages) {
+        console.log(chalk.white(lang.name))
+      }
+    } else {
+      console.log(chalk.yellow(`Movie ${movie.id} doesn't have spoken langages`))
+    }  
+}
+
+function printReview(reviews) {
+
+  if(reviews.results.length >= 1) {
+    console.log('\n' + chalk.white('------------------')
+    + chalk.white(`\npage ${reviews.page} of ${reviews.total_pages}`)
+    + chalk.white('\nReviews:'))
+    for (let rev of reviews.results) {
+        console.log(chalk.white(`\nAuthor: `) + chalk.blue.bold(rev.author))
+        rev.content.length>400 ? console.log(chalk.white(`\nContent: ${rev.content.slice(0,400)} ...`)) : console.log(chalk.white(`\nContent: ${rev.content}`))      
+    }   
+  } else {
+    console.log(chalk.yellow.bold(`\nMovie with id ${reviews.id} doesnt't have reviews`))
+  }  
 }

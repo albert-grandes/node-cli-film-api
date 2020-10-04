@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {fetchPopularPersons, fetchPersonById} from './persons.js'
-import {fetchMovies} from './movies.js'
+import {fetchMovies, fetchMovieById} from './movies.js'
 import program from 'commander'
 import dotenv from 'dotenv'
 
@@ -30,9 +30,18 @@ program
   .option('-n --now', 'get movies which are out now')
   .option('-p --popular', 'get popular movies')
   .action((options) => {
-    console.log(options.now)
     let extraFlag = options.now ? 'now_playing' : 'popular'
     fetchMovies(options.page, extraFlag)
+  })
+
+  program
+  .command('get-movie')
+  .description('Make a network request to fetch movies')
+  .requiredOption('--id <number>', 'get movie by Id')
+  .option('--reviews', 'get reviews for the movie with id')
+  .action((options) => {
+    let extraFlag = options.reviews ? '/reviews' : ''
+    fetchMovieById(options.id, extraFlag)
   })
 
 program.parse(process.argv)
