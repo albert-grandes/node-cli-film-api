@@ -3,24 +3,24 @@ import ora from 'ora'
 import chalk from 'chalk'
 
 
-export function fetchPopularPersons(page) {
+export function fetchMovies(page, extra) {
     //https://nodejs.org/api/https.html#https_https_request_options_callback
-   
+   console.log(extra)
     const options = {
         host: 'api.themoviedb.org',
         port: 443,
-        path: `/3/person/popular?page=${page}&api_key=${process.env.API_KEY}`,
+        path: `/3/movie/${extra}?api_key=${process.env.API_KEY}&page=${page}`,
         method: 'GET'
     };
     const spinner = ora('Loading popular').start()
     https.request( options, (res) => {
-        let response = "";
-        res.on('data', (d) => {
-            response += d 
-        });
-        res.on('end', (d) => { 
-            printPopular(JSON.parse(response))
-            spinner.succeed("Popular loaded");                   
+        let response = ''
+        res.on('data', (data) => {
+          response += data
+        })
+        res.on('end', (d) => {
+            printMovies(JSON.parse(response)) 
+            extra=='now_playing' ? spinner.succeed("Movies playing now loaded") : spinner.succeed("Popular movies loaded")
         });
     })
     .on('error', (e) => {
@@ -29,7 +29,7 @@ export function fetchPopularPersons(page) {
     .end();
 }
 
-export function fetchPersonById(id) {
+export function fetchById(id) {
     //https://nodejs.org/api/https.html#https_https_request_options_callback
    
     const options = {
@@ -51,29 +51,15 @@ export function fetchPersonById(id) {
     .end();
 }
 
-function printPopular(popular) {
+function printMovies(movies) {
     console.log('\n')
     console.log(chalk.white('------------------'))
-    console.log(chalk.white(`page ${popular.page} of ${popular.total_pages}`))
-    for (let person of popular.results) {
-        console.log('Person:')
-        console.log(chalk.white(`ID: ${person.id}`))
-        console.log(chalk.white('Name: ') + chalk.blue.bold(person.name))
-        if(person.known_for_department) console.log(chalk.white('Deaprtment: ') + chalk.magenta.bold(person.known_for_department))
-        console.log('\n')
-        console.log(chalk.white('Appearing in movies:'))
-        console.log('\n')
-        if(person.known_for) {
-            for (let movie of person.known_for) {
-                console.log(chalk.white('\t Movie:'))
-                console.log(chalk.white(`\t ID: ${movie.id}`))
-                console.log(chalk.white(`\t Release date: ${movie.release_date}`))
-                console.log(chalk.white(`\t Title: ${movie.title} \n`))
-            }
-        }  else {
-            console.log(chalk.yellow.bold(`\t ${person.name} does not appear in any movies`))
-        }
-        console.log('\n')       
+    console.log(chalk.white(`page ${movies.page} of ${movies.total_pages}`))
+    for (let movie of movies.results) {
+        console.log('Movie: \n')
+        console.log(chalk.white(`ID: ${movie.id}`))
+        console.log(chalk.white('Title: ') + chalk.blue.bold(movie.title))
+        console.log(chalk.white(`Release date: ${movie.release_date} \n`))
     }
 }
 
