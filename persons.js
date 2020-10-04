@@ -52,23 +52,25 @@ export function fetchPersonById(id) {
 }
 
 function printPopular(popular) {
-    console.log('\n')
-    console.log(chalk.white('------------------'))
-    console.log(chalk.white(`page ${popular.page} of ${popular.total_pages}`))
+    console.log('\n' 
+     + chalk.white('------------------')
+     + chalk.white(`page ${popular.page} of ${popular.total_pages}`))
+    
     for (let person of popular.results) {
-        console.log('Person:')
-        console.log(chalk.white(`ID: ${person.id}`))
-        console.log(chalk.white('Name: ') + chalk.blue.bold(person.name))
+        console.log('Person:'
+        + chalk.white(`\nID: ${person.id}`)
+        + chalk.white('\nName: ') 
+        + chalk.blue.bold(person.name))
+    
         if(person.known_for_department) console.log(chalk.white('Deaprtment: ') + chalk.magenta.bold(person.known_for_department))
-        console.log('\n')
-        console.log(chalk.white('Appearing in movies:'))
-        console.log('\n')
+        console.log(chalk.white('\nAppearing in movies:\n'))
+
         if(person.known_for) {
             for (let movie of person.known_for) {
-                console.log(chalk.white('\t Movie:'))
-                console.log(chalk.white(`\t ID: ${movie.id}`))
-                console.log(chalk.white(`\t Release date: ${movie.release_date}`))
-                console.log(chalk.white(`\t Title: ${movie.title} \n`))
+                console.log(chalk.white('\t Movie:\n')
+                  +chalk.white(`\t ID: ${movie.id}\n`)
+                  +chalk.white(`\t Release date: ${movie.release_date}\n`)
+                  +chalk.white(`\t Title: ${movie.title} \n`))
             }
         }  else {
             console.log(chalk.yellow.bold(`\t ${person.name} does not appear in any movies`))
@@ -78,16 +80,18 @@ function printPopular(popular) {
 }
 
 function printById(person) {
-    console.log('\n')
-    console.log(chalk.white('------------------'))
-    
-    console.log(chalk.white('Person:'))
-    console.log(chalk.white(`ID: ${person.id}`))
-    console.log(chalk.white('Name: ') + chalk.blue.bold(person.name))
-    console.log(chalk.white(`Birthday: ${person.birthday}`) + chalk.grey(' | ') + chalk.white(person.place_of_birth))
-    if(person.known_for_department) console.log(chalk.white('Deaprtment: ') + chalk.magenta.bold(person.known_for_department)) 
-    console.log(chalk.white('Biogarphy: ') + chalk.blue.bold(person.biography))
-    console.log(chalk.white('\nAlso known as:'))
+    console.log('\n'
+      + chalk.white('------------------\n')
+      + chalk.white('\nPerson:\n')
+      + chalk.white(`\nID: ${person.id}`)
+      + chalk.white('\nName: ') + chalk.blue.bold(person.name)
+      + chalk.white(`\nBirthday: ${person.birthday}`) + chalk.grey(' | ') + chalk.white(person.place_of_birth)) 
+  
+    if(person.known_for_department) console.log(chalk.white('Department: ') + chalk.magenta.bold(person.known_for_department)) 
+    console.log(chalk.white('Biogarphy: ') 
+      + chalk.blue.bold(person.biography)
+      + chalk.white('\nAlso known as:'))
+  
     if(person.also_known_as.length > 0) {
         for(let name of person.also_known_as) {
             console.log(chalk.white(name))
