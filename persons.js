@@ -1,9 +1,10 @@
 import https from 'https'
 import ora from 'ora'
 import chalk from 'chalk'
+import fs from 'fs'
 
 
-export function fetchPopularPersons(page) {
+export function fetchPopularPersons(page, local) {
     //https://nodejs.org/api/https.html#https_https_request_options_callback
    
     const options = {
@@ -19,8 +20,16 @@ export function fetchPopularPersons(page) {
             response += d 
         });
         res.on('end', (d) => { 
-            printPopular(JSON.parse(response))
-            spinner.succeed("Popular loaded");                   
+            if(local == 'save') {
+                fs.writeFile('./persons/popular-persons.json', response, (err) => {
+                    if (err) throw err
+                    spinner.succeed('Data saved')
+                })
+            } else {
+                printPopular(JSON.parse(response))
+                spinner.succeed("Popular loaded")
+            }
+                              
         });
     })
     .on('error', (e) => {

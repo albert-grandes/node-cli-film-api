@@ -19,8 +19,13 @@ program
   .description('Make a network request to fetch person by id')
   .requiredOption('-p --popular', 'Fetch the popular persons')
   .requiredOption('--page <number>', 'get popular persons')
+  .option('--save', 'saving data to local json file')
   .action((options) => {
-    fetchPopularPersons(options.page)
+    let local = ''
+    if(options.save) {
+      local = 'save'
+    } 
+    fetchPopularPersons(options.page, local)
   })
 
   program
