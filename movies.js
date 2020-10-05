@@ -28,7 +28,7 @@ function fetchMovies(page, extra, local='undefined') {
       })
       res.on('end', (d) => {
           if(local == 'save') {
-            let path = (extra=='now_playing')? './movies/movies-now.json' : './movies/popular-movies.json';
+            let path = (extra=='now_playing') ? './movies/movies-now.json' : './movies/popular-movies.json';
             console.log("\t " + path)
             fs.writeFile(path, response, (err) => {
                 if (err) throw err
@@ -45,10 +45,8 @@ function fetchMovies(page, extra, local='undefined') {
     spinner.fail(`Something went wrong! Error message: ${e.message}`)
   })
   .end();
-}
-    //https://nodejs.org/api/https.html#https_https_request_options_callback
-   console.log(extra)
-    
+ }
+    //https://nodejs.org/api/https.html#https_https_request_options_callback    
 }
 
 function fetchMovieById(id, extraTag) {
