@@ -31,8 +31,8 @@ function fetchPopularPersons(page, local=undefined) {
         res.on('end', (d) => { 
             if(local == 'save') {
                 fs.writeFile('./persons/popular-persons.json', response, (err) => {
-                    if (err) throw err
-                    spinner.succeed('Data saved')
+                  if (err) spinner.fail('We can not save data')
+                  spinner.succeed('Data saved')
                 })
             } else {
                 printPopular(JSON.parse(response))
@@ -49,26 +49,46 @@ function fetchPopularPersons(page, local=undefined) {
     
 }
 
-function fetchPersonById(id) {
-    //https://nodejs.org/api/https.html#https_https_request_options_callback
-   
+function fetchPersonById(id, local='undefined') {
+  const spinner = ora('Fetchin person data').start()
+    if(local =='local') {
+      if(fs.existsSync('./persons/person-id.json')) {
+         const response = fs.readFileSync('./persons/person-id.json');
+         printById(JSON.parse(response))
+         spinner.succeed("Popular loaded from local")
+      } else {
+       spinner.warn('The information not is storage in local. Use --save to save information in local.')
+      }
+  } else {
     const options = {
         host: 'api.themoviedb.org',
         port: 443,
         path: `/3/person/${id}?api_key=${process.env.API_KEY}`,
         method: 'GET'
     };
-    const spinner = ora('Fetchin person data').start()
+    
     https.request( options, (res) => {
-        res.on('data', (data) => { 
-            printById(JSON.parse(data))
-            spinner.succeed("Person loaded");                   
+      let response = "";
+        res.on('data', (d) => {
+            response += d 
+        });
+        res.on('end', () => {           
+            if(local == 'save') {
+                fs.writeFile('./persons/person-id.json', response, (err) => {
+                    if (err) spinner.fail('We can not save data')
+                    spinner.succeed('Data saved')
+                })
+            } else {
+              printById(JSON.parse(response))
+              spinner.succeed("Person loaded");
+            }
         });
     })
     .on('error', (e) => {
       spinner.fail(`Something went wrong! Error message: ${e.message}`)
     })
     .end();
+  }
 }
 
 function printPopular(popular) {

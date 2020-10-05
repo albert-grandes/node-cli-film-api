@@ -14,8 +14,22 @@ program
   .command('get-person')
   .description('Make a network request to fetch the most popular persons')
   .requiredOption('--id <number>', 'get person')
+  .option('--save', 'saving data to local json file')
+  .option('--local', 'showing data from local json file', 'local')
   .action((options) => {
-    persons.fetchPersonById(options.id)
+    let extraFlag = ''
+    if(options.local && options.save) {
+      console.warn('ERROR: You cannot use two extra flag (--save and --local) at the same time')
+    } else {
+      if(options.save) {
+        extraFlag = 'save'
+      }
+      if(options.local) {
+        extraFlag = 'local'
+      }
+      persons.fetchPersonById(options.id, extraFlag)
+    }
+    
   })
 
   program
@@ -24,7 +38,7 @@ program
   .requiredOption('-p --popular', 'Fetch the popular persons')
   .requiredOption('--page <number>', 'get popular persons')
   .option('--save', 'saving data to local json file')
-  .option('--local', 'saving data to local json file', 'local')
+  .option('--local', 'showing data from local json file', 'local')
   .action((options) => {
     let extraFlag = ''
     if(options.local && options.save) {
@@ -47,7 +61,7 @@ program
   .option('-n --now-playing', 'get movies which are out now')
   .option('-p --popular', 'get popular movies')
   .option('--save', 'saving data to local json file')
-  .option('--local', 'extracting data to local json file', 'local')
+  .option('--local', 'showing data from local json file', 'local')
   .action((options) => {
     let extraFlag2 = ''
     if(options.local && options.save) {
@@ -70,9 +84,23 @@ program
   .description('Make a network request to fetch movies')
   .requiredOption('--id <number>', 'get movie by Id')
   .option('--reviews', 'get reviews for the movie with id')
+  .option('--save', 'saving data to local json file')
+  .option('--local', 'showing data from local json file', 'local')
   .action((options) => {
     let extraFlag = options.reviews ? '/reviews' : ''
-    movies.fetchMovieById(options.id, extraFlag)
+    let extraFlag2 = ''
+    if(options.local && options.save) {
+      console.warn('ERROR: You cannot use two extra flag (--save and --local) at the same time')
+    } else {
+      if(options.save) {
+        extraFlag2 = 'save'
+      }
+      if(options.local) {
+        extraFlag2 = 'local'
+      }
+      movies.fetchMovieById(options.id, extraFlag, extraFlag2)
+    }
+    
   })
 
 program.parse(process.argv)

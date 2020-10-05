@@ -7,10 +7,11 @@ const fs = require('fs')
 function fetchMovies(page, extra, local='undefined') {
   const spinner = ora('Loading popular').start()
   if(local =='local') {
-    if(fs.existsSync('./persons/movies-now.json')) {
-       const response = fs.readFileSync('persons/movies-now.json');
-       printMovies(JSON.parse(response))
-       spinner.succeed("Popular loaded from local")
+    let path = (extra=='now_playing')? './movies/movies-now.json' : './movies/popular-movies.json';
+    if(fs.existsSync(path)) {
+      const response = fs.readFileSync(path);
+      printMovies(JSON.parse(response))
+      spinner.succeed("Popular loaded from local")
     } else {
       spinner.warn('The information not is storage in local. Use --save to save information in local.')
     }
@@ -31,7 +32,7 @@ function fetchMovies(page, extra, local='undefined') {
             let path = (extra=='now_playing') ? './movies/movies-now.json' : './movies/popular-movies.json';
             console.log("\t " + path)
             fs.writeFile(path, response, (err) => {
-                if (err) throw err
+              if (err) spinner.fail('We can not save data')
                 spinner.succeed('Data saved')
                 //extra=='now_playing' ? spinner.succeed("Movies playing now loaded") : spinner.succeed("Popular movies loaded")
             })
@@ -45,37 +46,67 @@ function fetchMovies(page, extra, local='undefined') {
     spinner.fail(`Something went wrong! Error message: ${e.message}`)
   })
   .end();
- }
-    //https://nodejs.org/api/https.html#https_https_request_options_callback    
+}    
 }
 
-function fetchMovieById(id, extraTag) {
+function fetchMovieById(id, extraTag, local='undefined') {
+  const spinner = ora('Fetching movie data').start()
+  if(local =='local') {
+    let path = (extraTag=='/reviews')? './movies/movies-reviews.json' : './movies/movies-id.json';
+    if(fs.existsSync(path)) {
+      const response = fs.readFileSync(path);
+      const solution = (extraTag=='/reviews')? printReview(JSON.parse(response)) : printMovie(JSON.parse(response));
+      if(solution) {
+        spinner.succeed("Popular loaded from local")
+      } else {
+        spinner.warn("Problem printing data.")
+      }
+      
+      
+    } else {
+      spinner.warn('The information not is storage in local. Use --save to save information in local.')
+    }
+  } else {
     const options = {
         host: 'api.themoviedb.org',
         port: 443,
         path: `/3/movie/${id}${extraTag}?api_key=${process.env.API_KEY}`,
         method: 'GET'
     };
-    const spinner = ora('Fetching movie data').start()
+    
     https.request( options, (res) => {
         let result = ''
         res.on('data', (data)=> {
           result += data
         })
         res.on('end', () => { 
+          if(local == 'save') {
+            let path = (extraTag=='/reviews')? './movies/movies-reviews.json' : './movies/movies-id.json';
+            console.log("\t " + path)
+            fs.writeFile(path, result, (err) => {
+              if (err) {
+                spinner.fail('We can not save data')
+              } else {
+                spinner.succeed('Data saved')
+              }
+                
+            })
+        } else {
             if(extraTag == '/reviews') {
               printReview(JSON.parse(result))
               spinner.succeed("Review loaded") 
             } else {
               printMovie(JSON.parse(result))
               spinner.succeed("Movie loaded") 
-            }                          
+            }
+          }                        
         });
     })
     .on('error', (e) => {
       spinner.fail(`Something went wrong! Error message: ${e.message}`)
     })
     .end();
+  }
 }
 
 function printMovies(movies) {
@@ -91,6 +122,8 @@ function printMovies(movies) {
 }
 
 function printMovie(movie) {
+  try {
+    if(movie.success == false) throw true
     console.log('\n' + chalk.white('------------------'))
     
     console.log(chalk.white('\nMovie: \n') 
@@ -117,7 +150,11 @@ function printMovie(movie) {
       }
     } else {
       console.log(chalk.yellow(`Movie ${movie.id} doesn't have spoken langages`))
-    }  
+    }
+    return true;
+  } catch(e){
+    return false;
+  }
 }
 
 function printReview(reviews) {
