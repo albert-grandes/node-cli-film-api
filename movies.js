@@ -29,7 +29,7 @@ function fetchMovies(page, extra, local='undefined') {
       })
       res.on('end', (d) => {
           if(local == 'save') {
-            let path = (extra=='now_playing')? './movies/movies-now.json' : './movies/popular-movies.json';
+            let path = (extra=='now_playing') ? './movies/movies-now.json' : './movies/popular-movies.json';
             console.log("\t " + path)
             fs.writeFile(path, response, (err) => {
               if (err) {
