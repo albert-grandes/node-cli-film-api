@@ -9,10 +9,8 @@ function fetchPopularPersons(page, local=undefined) {
     //https://nodejs.org/api/https.html#https_https_request_options_callback
    if(local =='local') {
        if(fs.existsSync('./persons/popular-persons.json')) {
-          const response = fs.readFileSync('persons/popular-persons.json');
-          
-          const solution = printPopular(JSON.parse(response))
-            
+          const response = fs.readFileSync('persons/popular-persons.json');         
+          const solution = printPopular(JSON.parse(response))          
           solution ? spinner.succeed("Popular loaded from local") : spinner.warn("Problem printing data.")
       
        } else {
@@ -48,8 +46,7 @@ function fetchPopularPersons(page, local=undefined) {
       spinner.fail(`Something went wrong! Error message: ${e.message}`)
     })
     .end()
-   }
-    
+   }    
 }
 
 function fetchPersonById(id, local='undefined') {
@@ -57,8 +54,8 @@ function fetchPersonById(id, local='undefined') {
     if(local =='local') {
       if(fs.existsSync('./persons/person-id.json')) {
          const response = fs.readFileSync('./persons/person-id.json');
-         printById(JSON.parse(response))
-         spinner.succeed("Popular loaded from local")
+         const solution = printPopular(JSON.parse(response))         
+         solution ? spinner.succeed("Popular persons loaded from local") : spinner.warn("Problem printing data.")
       } else {
        spinner.warn('The information not is storage in local. Use --save to save information in local.')
       }
@@ -82,8 +79,8 @@ function fetchPersonById(id, local='undefined') {
                     spinner.succeed('Data saved')
                 })
             } else {
-              printById(JSON.parse(response))
-              spinner.succeed("Person loaded");
+              const solution = printById(JSON.parse(response))         
+              solution ? spinner.succeed("Person loaded") : spinner.warn("Problem printing data.")
             }
         });
     })
@@ -127,29 +124,36 @@ function printPopular(popular) {
             return true
 
     } catch(e) {
-      return false;
+      return false
     }    
 }
 
 function printById(person) {
-    console.log('\n'
-      + chalk.white('------------------\n')
-      + chalk.white('\nPerson:\n')
-      + chalk.white(`\nID: ${person.id}`)
-      + chalk.white('\nName: ') + chalk.blue.bold(person.name)
-      + chalk.white(`\nBirthday: ${person.birthday}`) + chalk.grey(' | ') + chalk.white(person.place_of_birth)) 
-  
-    if(person.known_for_department) console.log(chalk.white('Department: ') + chalk.magenta.bold(person.known_for_department)) 
-    console.log(chalk.white('Biogarphy: ') 
-      + chalk.blue.bold(person.biography)
-      + chalk.white('\nAlso known as:'))
-  
-    if(person.also_known_as.length > 0) {
-        for(let name of person.also_known_as) {
-            console.log(chalk.white(name))
-        } 
-    } else {
-        console.log(chalk.yellow.bold(`${person.name} doesn't have other names`))
+      
+    try {
+        checkErrors(person)
+
+        console.log('\n'
+        + chalk.white('------------------\n')
+        + chalk.white('\nPerson:\n')
+        + chalk.white(`\nID: ${person.id}`)
+        + chalk.white('\nName: ') + chalk.blue.bold(person.name)
+        + chalk.white(`\nBirthday: ${person.birthday}`) + chalk.grey(' | ') + chalk.white(person.place_of_birth)) 
+    
+        if(person.known_for_department) console.log(chalk.white('Department: ') + chalk.magenta.bold(person.known_for_department)) 
+        console.log(chalk.white('Biogarphy: ') 
+        + chalk.blue.bold(person.biography)
+        + chalk.white('\nAlso known as:'))
+    
+        if(person.also_known_as.length > 0) {
+            for(let name of person.also_known_as) {
+                console.log(chalk.white(name))
+            } 
+        } else {
+            console.log(chalk.yellow.bold(`${person.name} doesn't have other names`))
+        }
+    } catch(e) {
+        return false
     }
 }
 
