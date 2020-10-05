@@ -1,11 +1,17 @@
 #!/usr/bin/env node
-import {fetchPopularPersons, fetchPersonById} from './persons.js'
-import {fetchMovies, fetchMovieById} from './movies.js'
-import program from 'commander'
-import dotenv from 'dotenv'
+//import apiCall from "./clearfunctions";
+const ora = require('ora');
+const call = require('./functions');
+const { program } = require('commander');
+const https = require('https'); //https://nodejs.org/api/https.html 
+require('dotenv').config()
 
-dotenv.config()
 
+
+//program.option('-t, --test', 'only is a test')
+
+
+console.log(process.env.API_KEY)
 program
   .command('get-person')
   .description('Make a network request to fetch the most popular persons')
@@ -45,8 +51,8 @@ program
   .requiredOption('--id <number>', 'get movie by Id')
   .option('--reviews', 'get reviews for the movie with id')
   .action((options) => {
-    let extraFlag = options.reviews ? '/reviews' : ''
-    fetchMovieById(options.id, extraFlag)
+    
+    call.apiCall(options.page)
   })
 
 program.parse(process.argv)
