@@ -1,6 +1,9 @@
 const https = require('https');
+const ora = require('ora');
+
 
 function apiCall(page) {
+  const spinner = ora('Loading unicorns').start();
   //https://nodejs.org/api/https.html#https_https_request_options_callback
   const options = {
       host: 'api.themoviedb.org',
@@ -18,6 +21,7 @@ function apiCall(page) {
       res.on('end', (d) => {
           let json = JSON.parse(response)
           console.log(json)
+          spinner.succeed("Finish project")
           return json;
       });
   })

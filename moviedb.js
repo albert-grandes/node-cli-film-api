@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 //import apiCall from "./clearfunctions";
-
+const ora = require('ora');
 const call = require('./functions');
-
+const { program } = require('commander');
+const https = require('https'); //https://nodejs.org/api/https.html 
 require('dotenv').config()
 
 
-const { program } = require('commander');
-const https = require('https'); //https://nodejs.org/api/https.html 
+
 //program.option('-t, --test', 'only is a test')
 
 
@@ -18,6 +18,7 @@ program
   .requiredOption('-p --popular', 'Fetch the popular persons')
   .requiredOption('--page <number>', 'get popular persons')
   .action((options) => {
+    
     call.apiCall(options.page)
   })
 
