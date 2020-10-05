@@ -4,7 +4,7 @@ const chalk = require('chalk')
 const fs = require('fs')
 
 
-function fetchMovies(page, extra) {
+function fetchMovies(page, extra='popular') {
     //https://nodejs.org/api/https.html#https_https_request_options_callback
    console.log(extra)
     const options = {

@@ -10,8 +10,6 @@ require('dotenv').config()
 
 //program.option('-t, --test', 'only is a test')
 
-
-console.log(process.env.API_KEY)
 program
   .command('get-person')
   .description('Make a network request to fetch the most popular persons')
@@ -26,12 +24,20 @@ program
   .requiredOption('-p --popular', 'Fetch the popular persons')
   .requiredOption('--page <number>', 'get popular persons')
   .option('--save', 'saving data to local json file')
+  .option('--local', 'saving data to local json file', 'local')
   .action((options) => {
-    let local = ''
-    if(options.save) {
-      local = 'save'
-    } 
-    persons.fetchPopularPersons(options.page, local)
+    let extraFlag = ''
+    if(options.local && options.save) {
+      console.warn('ERROR: You cannot use two extra flag (--save and --local) at the same time')
+    } else {
+      if(options.save) {
+        extraFlag = 'save'
+      }
+      if(options.local) {
+        extraFlag = 'local'
+      }
+      persons.fetchPopularPersons(options.page, extraFlag)
+    }
   })
 
  program

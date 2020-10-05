@@ -4,16 +4,25 @@ const chalk = require('chalk')
 const fs = require('fs')
 
 
-function fetchPopularPersons(page, local) {
+function fetchPopularPersons(page, local=undefined) {
+  const spinner = ora('Loading popular').start()
     //https://nodejs.org/api/https.html#https_https_request_options_callback
-   
+   if(local =='local') {
+       if(fs.existsSync('./persons/popular-persons.json')) {
+          const response = fs.readFileSync('persons/popular-persons.json');
+          printPopular(JSON.parse(response))
+          spinner.succeed("Popular loaded from local")
+       } else {
+        spinner.warn('The information not is storage in local. Use --save to save information in local.')
+       }
+   } else {
     const options = {
-        host: 'api.themoviedb.org',
-        port: 443,
-        path: `/3/person/popular?page=${page}&api_key=${process.env.API_KEY}`,
-        method: 'GET'
+      host: 'api.themoviedb.org',
+      port: 443,
+      path: `/3/person/popular?page=${page}&api_key=${process.env.API_KEY}`,
+      method: 'GET'
     };
-    const spinner = ora('Loading popular').start()
+    
     https.request( options, (res) => {
         let response = "";
         res.on('data', (d) => {
@@ -36,6 +45,8 @@ function fetchPopularPersons(page, local) {
       spinner.fail(`Something went wrong! Error message: ${e.message}`)
     })
     .end();
+   }
+    
 }
 
 function fetchPersonById(id) {
