@@ -7,10 +7,11 @@ const fs = require('fs')
 function fetchMovies(page, extra, local='undefined') {
   const spinner = ora('Loading popular').start()
   if(local =='local') {
-    if(fs.existsSync('./persons/movies-now.json')) {
-       const response = fs.readFileSync('persons/movies-now.json');
-       printMovies(JSON.parse(response))
-       spinner.succeed("Popular loaded from local")
+    let path = (extra=='now_playing')? './movies/movies-now.json' : './movies/popular-movies.json';
+    if(fs.existsSync(path)) {
+      const response = fs.readFileSync(path);
+      printMovies(JSON.parse(response))
+      spinner.succeed("Popular loaded from local")
     } else {
       spinner.warn('The information not is storage in local. Use --save to save information in local.')
     }
