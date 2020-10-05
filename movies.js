@@ -1,9 +1,10 @@
-import https from 'https'
-import ora from 'ora'
-import chalk from 'chalk'
+const https  = require('https')
+const ora = require('ora');
+const chalk = require('chalk')
+const fs = require('fs')
 
 
-export function fetchMovies(page, extra) {
+function fetchMovies(page, extra) {
     //https://nodejs.org/api/https.html#https_https_request_options_callback
    console.log(extra)
     const options = {
@@ -29,7 +30,7 @@ export function fetchMovies(page, extra) {
     .end();
 }
 
-export function fetchMovieById(id, extraTag) {
+function fetchMovieById(id, extraTag) {
     const options = {
         host: 'api.themoviedb.org',
         port: 443,
@@ -114,3 +115,6 @@ function printReview(reviews) {
     console.log(chalk.yellow.bold(`\nMovie with id ${reviews.id} doesnt't have reviews`))
   }  
 }
+
+exports.fetchMovies = fetchMovies
+exports.fetchMovieById = fetchMovieById

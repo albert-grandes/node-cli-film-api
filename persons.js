@@ -1,10 +1,10 @@
-import https from 'https'
-import ora from 'ora'
-import chalk from 'chalk'
-import fs from 'fs'
+const https  = require('https')
+const ora = require('ora');
+const chalk = require('chalk')
+const fs = require('fs')
 
 
-export function fetchPopularPersons(page, local) {
+function fetchPopularPersons(page, local) {
     //https://nodejs.org/api/https.html#https_https_request_options_callback
    
     const options = {
@@ -38,7 +38,7 @@ export function fetchPopularPersons(page, local) {
     .end();
 }
 
-export function fetchPersonById(id) {
+function fetchPersonById(id) {
     //https://nodejs.org/api/https.html#https_https_request_options_callback
    
     const options = {
@@ -109,3 +109,6 @@ function printById(person) {
         console.log(chalk.yellow.bold(`${person.name} doesn't have other names`))
     }
 }
+
+exports.fetchPopularPersons = fetchPopularPersons
+exports.fetchPersonById = fetchPersonById

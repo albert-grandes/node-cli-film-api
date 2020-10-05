@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 //import apiCall from "./clearfunctions";
-const ora = require('ora');
-const call = require('./functions');
+const persons = require('./persons');
+const movies = require('./movies');
 const { program } = require('commander');
 const https = require('https'); //https://nodejs.org/api/https.html 
 require('dotenv').config()
@@ -17,7 +17,7 @@ program
   .description('Make a network request to fetch the most popular persons')
   .requiredOption('--id <number>', 'get person')
   .action((options) => {
-    fetchPersonById(options.id)
+    persons.fetchPersonById(options.id)
   })
 
   program
@@ -31,10 +31,10 @@ program
     if(options.save) {
       local = 'save'
     } 
-    fetchPopularPersons(options.page, local)
+    persons.fetchPopularPersons(options.page, local)
   })
 
-  program
+ program
   .command('get-movies')
   .description('Make a network request to fetch movies')
   .requiredOption('--page <number>', 'get movies with page number')
@@ -42,7 +42,7 @@ program
   .option('-p --popular', 'get popular movies')
   .action((options) => {
     let extraFlag = options.now ? 'now_playing' : 'popular'
-    fetchMovies(options.page, extraFlag)
+    movies.fetchMovies(options.page, extraFlag)
   })
 
   program
@@ -51,8 +51,8 @@ program
   .requiredOption('--id <number>', 'get movie by Id')
   .option('--reviews', 'get reviews for the movie with id')
   .action((options) => {
-    
-    call.apiCall(options.page)
+    let extraFlag = options.reviews ? '/reviews' : ''
+    movies.fetchMovieById(options.id, extraFlag)
   })
 
 program.parse(process.argv)
