@@ -44,10 +44,10 @@ program
   .command('get-movies')
   .description('Make a network request to fetch movies')
   .requiredOption('--page <number>', 'get movies with page number')
-  .option('-n --now', 'get movies which are out now')
+  .option('-n --now-playing', 'get movies which are out now')
   .option('-p --popular', 'get popular movies')
   .action((options) => {
-    let extraFlag = options.now ? 'now_playing' : 'popular'
+    let extraFlag = options.nowPlaying ? 'now_playing' : 'popular'
     movies.fetchMovies(options.page, extraFlag)
   })
 
