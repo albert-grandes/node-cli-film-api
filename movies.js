@@ -4,30 +4,51 @@ const chalk = require('chalk')
 const fs = require('fs')
 
 
-function fetchMovies(page, extra='popular') {
+function fetchMovies(page, extra, local='undefined') {
+  const spinner = ora('Loading popular').start()
+  if(local =='local') {
+    if(fs.existsSync('./persons/movies-now.json')) {
+       const response = fs.readFileSync('persons/movies-now.json');
+       printMovies(JSON.parse(response))
+       spinner.succeed("Popular loaded from local")
+    } else {
+      spinner.warn('The information not is storage in local. Use --save to save information in local.')
+    }
+} else {
+  const options = {
+    host: 'api.themoviedb.org',
+    port: 443,
+    path: `/3/movie/${extra}?api_key=${process.env.API_KEY}&page=${page}`,
+    method: 'GET'
+  };
+  https.request( options, (res) => {
+      let response = ''
+      res.on('data', (data) => {
+        response += data
+      })
+      res.on('end', (d) => {
+          if(local == 'save') {
+            let path = (extra=='now_playing')? './movies/movies-now.json' : './movies/popular-movies.json';
+            console.log("\t " + path)
+            fs.writeFile(path, response, (err) => {
+                if (err) throw err
+                spinner.succeed('Data saved')
+                //extra=='now_playing' ? spinner.succeed("Movies playing now loaded") : spinner.succeed("Popular movies loaded")
+            })
+        } else {
+          printMovies(JSON.parse(response)) 
+          extra=='now_playing' ? spinner.succeed("Movies playing now loaded") : spinner.succeed("Popular movies loaded")
+        }
+      });
+  })
+  .on('error', (e) => {
+    spinner.fail(`Something went wrong! Error message: ${e.message}`)
+  })
+  .end();
+}
     //https://nodejs.org/api/https.html#https_https_request_options_callback
    console.log(extra)
-    const options = {
-        host: 'api.themoviedb.org',
-        port: 443,
-        path: `/3/movie/${extra}?api_key=${process.env.API_KEY}&page=${page}`,
-        method: 'GET'
-    };
-    const spinner = ora('Loading popular').start()
-    https.request( options, (res) => {
-        let response = ''
-        res.on('data', (data) => {
-          response += data
-        })
-        res.on('end', (d) => {
-            printMovies(JSON.parse(response)) 
-            extra=='now_playing' ? spinner.succeed("Movies playing now loaded") : spinner.succeed("Popular movies loaded")
-        });
-    })
-    .on('error', (e) => {
-      spinner.fail(`Something went wrong! Error message: ${e.message}`)
-    })
-    .end();
+    
 }
 
 function fetchMovieById(id, extraTag) {

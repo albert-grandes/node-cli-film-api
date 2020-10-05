@@ -46,9 +46,23 @@ program
   .requiredOption('--page <number>', 'get movies with page number')
   .option('-n --now-playing', 'get movies which are out now')
   .option('-p --popular', 'get popular movies')
+  .option('--save', 'saving data to local json file')
+  .option('--local', 'extracting data to local json file', 'local')
   .action((options) => {
-    let extraFlag = options.nowPlaying ? 'now_playing' : 'popular'
-    movies.fetchMovies(options.page, extraFlag)
+    let extraFlag2 = ''
+    if(options.local && options.save) {
+      console.warn('ERROR: You cannot use two extra flag (--save and --local) at the same time')
+    } else {
+      if(options.save) {
+        extraFlag2 = 'save'
+      }
+      if(options.local) {
+        extraFlag2 = 'local'
+      }
+      const extraFlag = options.nowPlaying ? 'now_playing' : 'popular'
+      movies.fetchMovies(options.page, extraFlag, extraFlag2)
+    }
+    
   })
 
   program
