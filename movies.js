@@ -18,8 +18,6 @@ function fetchMovies(page, extra, local='undefined') {
         })
         res.on('end', () => {
             if(local == 'save') {
-              let path = (extra=='now_playing') ? './movies/movies-now.json' : './movies/popular-movies.json';
-              console.log("\t " + path)
               saveLocal(path, response)
           } else {
             const spinner = ora('Loading popular').start()
@@ -46,26 +44,22 @@ function fetchMovieById(id, extraTag, local='undefined') {
   } else {
     const path = `/3/movie/${id}${extraTag}?api_key=${process.env.API_KEY}`
     const options = new Options(path)  
-    https.request( options, (res) => {
-        
+    https.request( options, (res) => {      
         let result = ''
         res.on('data', (data)=> {
           result += data
         })
         res.on('end', () => { 
           if(local == 'save') {
-            let path = (extraTag=='/reviews')? './movies/movies-reviews.json' : './movies/movies-id.json';
             saveLocal(path, result)
             } else {
                 const spinner = ora('Loading popular').start()
                 if(extraTag == '/reviews') {
                   const solution = printReview(JSON.parse(result))
                   solution ? spinner.succeed("Review loaded")  : spinner.fail('Problem printing data')
-                  return JSON.parse(result)
                 } else {
                   const solution = printMovie(JSON.parse(result))
                   solution ? spinner.succeed("Movie loaded") : spinner.fail('Problem printing data')
-                  return JSON.parse(result)
                 }
               }                        
         })
