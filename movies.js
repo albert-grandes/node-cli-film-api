@@ -2,7 +2,7 @@ const https  = require('https')
 const ora = require('ora');
 const chalk = require('chalk')
 const fs = require('fs')
-
+const ntf = require('./notifier');
 
 function fetchMovies(page, extra, local='undefined') {
   const spinner = ora('Loading popular').start()
@@ -36,6 +36,7 @@ function fetchMovies(page, extra, local='undefined') {
                 spinner.fail('We can not save data')
               } else {
                 spinner.succeed('Data saved')
+                ntf.notificate('Success', 'Data saved with exit')
               }
                 //extra=='now_playing' ? spinner.succeed("Movies playing now loaded") : spinner.succeed("Popular movies loaded")
             })
@@ -90,6 +91,7 @@ function fetchMovieById(id, extraTag, local='undefined') {
                 spinner.fail('We can not save data')
               } else {
                 spinner.succeed('Data saved')
+                ntf.notificate('Success', 'Data saved with exit')
               }
                 
             })

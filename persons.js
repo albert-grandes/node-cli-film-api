@@ -78,6 +78,7 @@ function fetchPersonById(id, local='undefined') {
                 fs.writeFile('./persons/person-id.json', response, (err) => {
                     if (err) spinner.fail('We can not save data')
                     spinner.succeed('Data saved')
+                    tf.notificate('Success', 'Data saved with exit')
                 })
             } else {
               const solution = printById(JSON.parse(response))         
