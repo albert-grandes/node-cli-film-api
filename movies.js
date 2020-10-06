@@ -5,79 +5,49 @@ const fs = require('fs')
 const ntf = require('./notifier');
 
 function fetchMovies(page, extra, local='undefined') {
-  const spinner = ora('Loading popular').start()
   if(local =='local') {
-    let path = (extra=='now_playing')? './movies/movies-now.json' : './movies/popular-movies.json';
-    if(fs.existsSync(path)) {
-      const response = fs.readFileSync(path);
-      const solution = printMovies(JSON.parse(response))
-      solution ? spinner.succeed("Popular loaded from local") : spinner.fail('Problem printing data.')
-    } else {
-      spinner.warn('The information not is storage in local. Use --save to save information in local.')
-    }
-} else {
-  const options = {
-    host: 'api.themoviedb.org',
-    port: 443,
-    path: `/3/movie/${extra}?api_key=${process.env.API_KEY}&page=${page}`,
-    method: 'GET'
-  };
-  https.request( options, (res) => {
-      let response = ''
-      res.on('data', (data) => {
-        response += data
-      })
-      res.on('end', (d) => {
-          if(local == 'save') {
-            let path = (extra=='now_playing') ? './movies/movies-now.json' : './movies/popular-movies.json';
-            console.log("\t " + path)
-            fs.writeFile(path, response, (err) => {
-              if (err) {
-                spinner.fail('We can not save data')
-              } else {
-                spinner.succeed('Data saved')
-                ntf.notificate('Success', 'Data saved with exit')
-              }
-                //extra=='now_playing' ? spinner.succeed("Movies playing now loaded") : spinner.succeed("Popular movies loaded")
-            })
-        } else {
-          const solution = printMovies(JSON.parse(response))          
-          if(solution) {
-            extra=='now_playing' ? spinner.succeed("Movies playing now loaded") : spinner.succeed("Popular movies loaded")
+    let path = (extra=='now_playing')? './movies/movies-now.json' : './movies/popular-movies.json'
+    loadLocal(path)
+} else { 
+    const path = `/3/movie/${extra}?api_key=${process.env.API_KEY}&page=${page}`;
+    const options = new Options(path)
+    https.request( options, (res) => {
+        let response = ''
+        res.on('data', (data) => {
+          response += data
+        })
+        res.on('end', () => {
+            if(local == 'save') {
+              let path = (extra=='now_playing') ? './movies/movies-now.json' : './movies/popular-movies.json';
+              console.log("\t " + path)
+              saveLocal(path, response)
           } else {
-            spinner.fail("Problem printing data.")
+            const spinner = ora('Loading popular').start()
+            const solution = printMovies(JSON.parse(response))          
+            if(solution) {
+              extra=='now_playing' ? spinner.succeed("Movies playing now loaded") : spinner.succeed("Popular movies loaded")
+            } else {
+              spinner.fail("Problem printing data.")
+            }       
           }
-          
-        }
-      });
-  })
-  .on('error', (e) => {
-    spinner.fail(`Something went wrong! Error message: ${e.message}`)
-  })
-  .end();
-}    
+        });
+    })
+    .on('error', (e) => {
+      spinner.fail(`Something went wrong! Error message: ${e.message}`)
+    })
+    .end();
+  }    
 }
 
 function fetchMovieById(id, extraTag, local='undefined') {
-  const spinner = ora('Fetching movie data').start()
   if(local =='local') {
     let path = (extraTag=='/reviews')? './movies/movies-reviews.json' : './movies/movies-id.json';
-    if(fs.existsSync(path)) {
-      const response = fs.readFileSync(path);
-      const solution = (extraTag=='/reviews')? printReview(JSON.parse(response)) : printMovie(JSON.parse(response));
-      solution ? spinner.succeed("Popular loaded from local") : spinner.warn("Problem printing data.")
-    } else {
-      spinner.warn('The information not is storage in local. Use --save to save information in local.')
-    }
+    loadLocal(path)
   } else {
-    const options = {
-        host: 'api.themoviedb.org',
-        port: 443,
-        path: `/3/movie/${id}${extraTag}?api_key=${process.env.API_KEY}`,
-        method: 'GET'
-    };
-    
+    const path = `/3/movie/${id}${extraTag}?api_key=${process.env.API_KEY}`
+    const options = new Options(path)  
     https.request( options, (res) => {
+        
         let result = ''
         res.on('data', (data)=> {
           result += data
@@ -85,26 +55,20 @@ function fetchMovieById(id, extraTag, local='undefined') {
         res.on('end', () => { 
           if(local == 'save') {
             let path = (extraTag=='/reviews')? './movies/movies-reviews.json' : './movies/movies-id.json';
-            console.log("\t " + path)
-            fs.writeFile(path, result, (err) => {
-              if (err) {
-                spinner.fail('We can not save data')
-              } else {
-                spinner.succeed('Data saved')
-                ntf.notificate('Success', 'Data saved with exit')
-              }
-                
-            })
-        } else {
-            if(extraTag == '/reviews') {
-              const solution = printReview(JSON.parse(result))
-              solution ? spinner.succeed("Review loaded")  : spinner.fail('Problem printing data')
+            saveLocal(path, result)
             } else {
-              const solution = printMovie(JSON.parse(result))
-              solution ? spinner.succeed("Movie loaded") : spinner.fail('Problem printing data')
-            }
-          }                        
-        });
+                const spinner = ora('Loading popular').start()
+                if(extraTag == '/reviews') {
+                  const solution = printReview(JSON.parse(result))
+                  solution ? spinner.succeed("Review loaded")  : spinner.fail('Problem printing data')
+                  return JSON.parse(result)
+                } else {
+                  const solution = printMovie(JSON.parse(result))
+                  solution ? spinner.succeed("Movie loaded") : spinner.fail('Problem printing data')
+                  return JSON.parse(result)
+                }
+              }                        
+        })
     })
     .on('error', (e) => {
       spinner.fail(`Something went wrong! Error message: ${e.message}`)
@@ -115,7 +79,7 @@ function fetchMovieById(id, extraTag, local='undefined') {
 
 function printMovies(movies) {
   try {
-    checkErrors(object)
+    checkErrors(movies)
   
     console.log('\n' + chalk.white('------------------ \n') 
       + chalk.white(`page ${movies.page} of ${movies.total_pages}`))
@@ -170,7 +134,7 @@ function printMovie(movie) {
 
 function printReview(reviews) {
   try {
-    checkErrors()
+    checkErrors(reviews)
     if(reviews.results.length >= 1) {
       console.log('\n' + chalk.white('------------------')
       + chalk.white(`\npage ${reviews.page} of ${reviews.total_pages}`)
@@ -185,9 +149,53 @@ function printReview(reviews) {
     return true
   } catch(e) {
     return false
+  }  
+}
+
+function checkErrors(object) {
+  if(object.success == false) throw false
+  if(object.hasOwnProperty('errors')) throw false
+}
+
+function loadLocal(path) {
+    const spinner = ora('Loading popular').start() 
+    if(fs.existsSync(path)) {
+      const response = fs.readFileSync(path)
+      let solution = ''
+      if (path == './movies/movies-now.json' || path == './movies/popular-movies.json') {
+        solution = printMovies(JSON.parse(response))
+      } else {
+        solution = printMovie(JSON.parse(response))
+      }
+      solution ? spinner.succeed("Popular loaded from local") : spinner.fail('Problem printing data.')
+    } else {
+      spinner.warn('The information not is storage in local. Use --save to save information in local.')
+    }  
+}
+
+function saveLocal(path, response) {
+  const spinner = ora('Loading popular').start()
+  fs.writeFile(path, response, (err) => {
+    if (err) {
+      spinner.fail('We can not save data')
+    } else {
+      spinner.succeed('Data saved')
+      ntf.notificate('Success', 'Data saved with exit')
+    }
+  })
+}
+
+class Options {
+  constructor(path) {
+    this.host = 'api.themoviedb.org',
+    this.port = 443,
+    this.path = path,
+    this.method = 'GET'
   }
-  
 }
 
 exports.fetchMovies = fetchMovies
 exports.fetchMovieById = fetchMovieById
+exports.printMovies = printMovies
+exports.printMovie = printMovie
+exports.printReview = printReview
