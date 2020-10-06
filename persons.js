@@ -2,6 +2,7 @@ const https  = require('https')
 const ora = require('ora');
 const chalk = require('chalk')
 const fs = require('fs')
+const ntf = require('./notifier');
 
 
 function fetchPopularPersons(page, local=undefined) {
@@ -12,7 +13,6 @@ function fetchPopularPersons(page, local=undefined) {
           const response = fs.readFileSync('persons/popular-persons.json');         
           const solution = printPopular(JSON.parse(response))          
           solution ? spinner.succeed("Popular loaded from local") : spinner.warn("Problem printing data.")
-      
        } else {
         spinner.warn('The information not is storage in local. Use --save to save information in local.')
        }
@@ -34,6 +34,7 @@ function fetchPopularPersons(page, local=undefined) {
                 fs.writeFile('./persons/popular-persons.json', response, (err) => {
                   if (err) spinner.fail('We can not save data')
                   spinner.succeed('Data saved')
+                  ntf.notificate('Success', 'Data saved with exit')
                 })
             } else {
                 const solution = printPopular(JSON.parse(response))         
