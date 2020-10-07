@@ -1,0 +1,81 @@
+{
+	"info": {
+		"_postman_id": "18cc480e-a2cc-4a6d-9f24-970b2d21ab1a",
+		"name": "MovieDB-requests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get-person page",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.themoviedb.org/3/person/popular?api_key=c8a8a87bd73c7f65150f1f15e60098fd&page=499",
+					"protocol": "https",
+					"host": [
+						"api",
+						"themoviedb",
+						"org"
+					],
+					"path": [
+						"3",
+						"person",
+						"popular"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "c8a8a87bd73c7f65150f1f15e60098fd"
+						},
+						{
+							"key": "page",
+							"value": "499"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-movies",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.themoviedb.org/3/movie/3?api_key=c8a8a87bd73c7f65150f1f15e60098fd",
+					"protocol": "https",
+					"host": [
+						"api",
+						"themoviedb",
+						"org"
+					],
+					"path": [
+						"3",
+						"movie",
+						"3"
+					],
+					"query": [
+						{
+							"key": "api_key",
+							"value": "c8a8a87bd73c7f65150f1f15e60098fd"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-person by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
