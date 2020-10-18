@@ -1,53 +1,109 @@
 #!/usr/bin/env node
 //import apiCall from "./clearfunctions";
-
-const call = require('./functions');
-const {program} = require('commander')
+const persons = require('./persons');
+const movies = require('./movies');
+const { program } = require('commander');
+const https = require('https'); //https://nodejs.org/api/https.html
 require('dotenv').config()
+
 
 
 //program.option('-t, --test', 'only is a test')
 
-console.log(process.env.API_KEY)
 program
   .command('get-person')
   .description('Make a network request to fetch the most popular persons')
+  .requiredOption('--id <number>', 'get person')
+  .option('--save', 'saving data to local json file')
+  .option('--local', 'showing data from local json file', 'local')
+  .action((options) => {
+    let extraFlag = ''
+    if(options.local && options.save) {
+      console.warn('ERROR: You cannot use two extra flag (--save and --local) at the same time')
+    } else {
+      if(options.save) {
+        extraFlag = 'save'
+      }
+      if(options.local) {
+        extraFlag = 'local'
+      }
+      persons.fetchPersonById(options.id, extraFlag)
+    }
+    
+  })
+
+  program
+  .command('get-persons')
+  .description('Make a network request to fetch person by id')
   .requiredOption('-p --popular', 'Fetch the popular persons')
   .requiredOption('--page <number>', 'get popular persons')
+  .option('--save', 'saving data to local json file')
+  .option('--local', 'showing data from local json file', 'local')
   .action((options) => {
-    call.apiCall(options.page)
+    let extraFlag = ''
+    if(options.local && options.save) {
+      console.warn('ERROR: You cannot use two extra flag (--save and --local) at the same time')
+    } else {
+      if(options.save) {
+        extraFlag = 'save'
+      }
+      if(options.local) {
+        extraFlag = 'local'
+      }
+      persons.fetchPopularPersons(options.page, extraFlag)
+    }
+  })
+
+ program
+  .command('get-movies')
+  .description('Make a network request to fetch movies')
+  .requiredOption('--page <number>', 'get movies with page number')
+  .option('-n --now-playing', 'get movies which are out now')
+  .option('-p --popular', 'get popular movies')
+  .option('--save', 'saving data to local json file')
+  .option('--local', 'showing data from local json file', 'local')
+  .action((options) => {
+    let extraFlag2 = ''
+    if(options.local && options.save) {
+      console.warn('ERROR: You cannot use two extra flag (--save and --local) at the same time')
+    } else {
+      if(options.save) {
+        extraFlag2 = 'save'
+      }
+      if(options.local) {
+        extraFlag2 = 'local'
+      }
+      const extraFlag = options.nowPlaying ? 'now_playing' : 'popular'
+      movies.fetchMovies(options.page, extraFlag, extraFlag2)
+    }
+    
+  })
+
+  program
+  .command('get-movie')
+  .description('Make a network request to fetch movies')
+  .requiredOption('--id <number>', 'get movie by Id')
+  .option('--reviews', 'get reviews for the movie with id')
+  .option('--save', 'saving data to local json file')
+  .option('--local', 'showing data from local json file', 'local')
+  .action((options) => {
+    let extraFlag = options.reviews ? '/reviews' : ''
+    let extraFlag2 = ''
+    if(options.local && options.save) {
+      console.warn('ERROR: You cannot use two extra flag (--save and --local) at the same time')
+    } else {
+      if(options.save) {
+        extraFlag2 = 'save'
+      }
+      if(options.local) {
+        extraFlag2 = 'local'
+      }
+      movies.fetchMovieById(options.id, extraFlag, extraFlag2)
+    }
+    
   })
 
 program.parse(process.argv)
 
-//if(program.test) console.log("The program is running")
-function apiCall22(page) {
-    //https://nodejs.org/api/https.html#https_https_request_options_callback
-    const options = {
-        host: 'api.themoviedb.org',
-        port: 443,
-        path: `/3/person/popular?page=${page}&api_key=${process.env.API_KEY}`,
-        method: 'GET'
-    };
-    //START REQUEST
-    https.request( options, (res) => {
-        let response = "";
-        res.on('data', (d) => {
-            //process.stdout.write(d);
-            response += d
-        });
-        res.on('end', (d) => {
-            let json = JSON.parse(response)
-            console.log(json)
-            return json;
-        });
-    })
-    .on('error', (e) => {
-        console.error(e);
-        return e;
-    })
-    .end();
-    //END REQUEST
-}
 
 //Executing using> $ node -r dotenv/config moviedb.js get-person -p --page 5
