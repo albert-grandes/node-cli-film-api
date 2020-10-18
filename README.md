@@ -143,9 +143,9 @@ May be applied to any command
 
 ## Authors
 
-**Yulia Belyakova** - [Code Assembler](https://code.assemblerschool.com/yulia-belyakova)
+**Yulia Belyakova** - [GitHub repository](https://github.com/Yulia-bel)
 
-**Albert Grandes** - [Code Assembler](https://code.assemblerschool.com/albert-grandes)
+**Albert Grandes** - [GitHub repository](https://code.assemblerschool.com/albert-grandes)
 
 
 
